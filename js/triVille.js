@@ -60,10 +60,19 @@ function getArrayCsv(csv) {
  * @param ville ville
  * @returns la distance qui sépare la ville de Grenoble
  */
-function distanceFromGrenoble(ville) {
-    console.log('implement me !');
-    return 0;
+function distanceFromGrenoble(ville) {                          // calcul de la distance entre Grenoble et une ville donnée en utilisant l'approximation équirectangulaire
+    const lat1 = 45.188529;
+    const lon1 = 5.724524;
+    const lat2 = ville.latitude;
+    const lon2 = ville.longitude;
+    let R = 6371;                                               // rayon de la terre en km
+    // let x = 1;                                                  // calcul de la différence de longitude multipliée par le cosinus de la moyenne des latitudes
+    let x = (lon2 - lon1) * Math.cos((lat1 + lat2) / 2);    // calcul de la différence de longitude multipliée par le cosinus de la moyenne des latitudes
+    let y = (lat2 - lat1);                                      // calcul de la différence de latitude
+    let d = Math.sqrt(x * x + y * y) * R;                    // calcul de la distance en km
+    return d;
 }
+
 
 /**
  * Retourne vrai si la ville i est plus proche de Grenoble
@@ -72,9 +81,13 @@ function distanceFromGrenoble(ville) {
  * @param {*} j distance de la ville j
  * @return vrai si la ville i est plus proche
  */
-function isLess(i, j) {
-    console.log('implement me !');
-    return true;
+function isLess(i, j) {                                         //prend en paramètre les indices sur 2 villes du tableaux et retourne vrai si listVille[i] est plus prêt de Grenoble que listVille[j]
+    nbComparaison++;                                            //incrémente le nombre de comparaison
+    if (listVille[i].distanceFromGrenoble < listVille[j].distanceFromGrenoble) { //si la distance de la ville i est plus petite que la distance de la ville j
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /**
@@ -82,9 +95,13 @@ function isLess(i, j) {
  * @param {*} i 
  * @param {*} j 
  */
-function swap(i, j) {
-    console.log('implement me !');
+function swap(i, j) {                                           //prend comme paramètres les indices de 2 villes du tableau listVille et permute ces 2 villes
+    let temp = listVille[i];                                    //on stocke la ville i dans une variable temporaire
+    listVille[i] = listVille[j];                                //on remplace la ville i par la ville j
+    listVille[j] = temp;                                        //on remplace la ville j par la ville i
+    nbPermutation++;                                            //on incrémente le nombre de permutation
 }
+
 
 function sort(type) {
     switch (type) {
@@ -113,7 +130,16 @@ function sort(type) {
 }
 
 function insertsort() {
-    console.log("insertsort - implement me !");
+    let j;
+    for (let i = 1; i < listVille.length; i++) {
+        j = i;
+        while (j > 0 && isLess(j, j - 1)) {
+            swap(j, j - 1);
+            j = j - 1;
+        }
+    }
+    displayPermutation(nbPermutation);
+    displayListVille(nbComparaison);
 }
 
 function selectionsort() {
