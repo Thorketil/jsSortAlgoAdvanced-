@@ -60,16 +60,34 @@ function getArrayCsv(csv) {
  * @param ville ville
  * @returns la distance qui sépare la ville de Grenoble
  */
-function distanceFromGrenoble(ville) {                          // calcul de la distance entre Grenoble et une ville donnée en utilisant l'approximation équirectangulaire
+// function distanceFromGrenoble(ville) {                          // calcul de la distance entre Grenoble et une ville donnée en utilisant l'approximation équirectangulaire
+//     const lat1 = 45.188529;
+//     const lon1 = 5.724524;
+//     const lat2 = ville.latitude;
+//     const lon2 = ville.longitude;
+//     let R = 6371000;                                               // rayon de la terre en m
+//     let x = (lon2 - lon1) * Math.cos((lat1 + lat2) / 2);    // calcul de la différence de longitude multipliée par le cosinus de la moyenne des latitudes
+//     let y = (lat2 - lat1);                                      // calcul de la différence de latitude
+//     let d = (Math.sqrt(x * x + y * y) )* R;                    // calcul de la distance en m
+//     return d;
+//
+    function distanceFromGrenoble(ville) {                          // calcul de la distance entre Grenoble et une ville donnée en utilisant l'approximation équirectangulaire
     const lat1 = 45.188529;
     const lon1 = 5.724524;
     const lat2 = ville.latitude;
     const lon2 = ville.longitude;
-    let R = 6371;                                               // rayon de la terre en km
-    // let x = 1;                                                  // calcul de la différence de longitude multipliée par le cosinus de la moyenne des latitudes
-    let x = (lon2 - lon1) * Math.cos((lat1 + lat2) / 2);    // calcul de la différence de longitude multipliée par le cosinus de la moyenne des latitudes
-    let y = (lat2 - lat1);                                      // calcul de la différence de latitude
-    let d = Math.sqrt(x * x + y * y) * R;                    // calcul de la distance en km
+    const R = 6371e3; // metres
+    const φ1 = lat1 * Math.PI/180; // φ, λ in radians
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    const d = R * c; // in metres
     return d;
 }
 
@@ -129,43 +147,85 @@ function sort(type) {
     }
 }
 
-function insertsort() {
-    let j;
-    for (let i = 1; i < listVille.length; i++) {
-        j = i;
-        while (j > 0 && isLess(j, j - 1)) {
-            swap(j, j - 1);
-            j = j - 1;
+function insertsort() {                                       //tri par insertion
+    let j;                                                    //variable qui va contenir l'indice de la ville précédente
+    for (let i = 1; i < listVille.length; i++) {              //on parcourt le tableau de la ville 1 à la ville n
+        j = i;                                                //on initialise j à i
+        while (j > 0 && isLess(j, j - 1)) {                //tant que j est supérieur à 0 et que la ville j est plus proche de Grenoble que la ville j-1
+            swap(j, j - 1);                                //on permute la ville j avec la ville j-1
+            j = j - 1;                                        //on décrémente j
         }
     }
     displayPermutation(nbPermutation);
-    displayListVille(nbComparaison);
+    displayListVille();
 }
 
-function selectionsort() {
-    console.log("selectionsort - implement me !");
+function selectionsort() {                                     //tri par sélection
+    for (let i = 0; i < listVille.length - 1; i++) {           //on parcourt le tableau de la ville 0 à la ville n-1
+        let min = i;                                           //on initialise min à i
+        for (let j = i + 1; j < listVille.length; j++) {       //on parcourt le tableau de la ville i+1 à la ville n pour trouver la ville la plus proche de Grenoble
+            if (isLess(j, min)) {                              //si la ville j est plus proche de Grenoble que la ville min
+                min = j;                                       //on met à jour min
+            }
+        }                                                      //on a parcouru le tableau et on a trouvé la ville la plus proche de Grenoble
+        swap(i, min);                                          //on permute la ville i avec la ville min
+    }
+    displayPermutation(nbPermutation);
+    displayListVille();
 }
 
-function bubblesort() {
-    console.log("bubblesort - implement me !");
+function bubblesort() {                                         //tri à bulles
+    for (let i = 0; i < listVille.length - 1; i++) {            //on parcourt le tableau de la ville 0 à la ville n-1
+        for (let j = 0; j < listVille.length - 1; j++) {        //on parcourt le tableau de la ville 0 à la ville n-1
+            if (isLess(j + 1, j)) {                           //si la ville j+1 est plus proche de Grenoble que la ville j
+                swap(j + 1, j);                               //on permute la ville j+1 avec la ville j
+            }                                                    //on a parcouru le tableau et on a trouvé la ville la plus proche de Grenoble
+        }
+    }
+    displayPermutation(nbPermutation);
+    displayListVille();
 }
 
-function shellsort() {
-    console.log("shellsort - implement me !");
+function shellsort() {                                       //tri par insertion avec un pas variable
+    let h = Math.floor(listVille.length / 2);             //on initialise h à la moitié de la taille du tableau arrondi à l'entier inférieur
+    while (h > 0) {                                          //tant que h est supérieur à 0
+        for (let i = h; i < listVille.length; i++) {         //on parcourt le tableau de la ville h à la ville n
+            let j = i;                                       //on initialise j à i
+            while (j >= h && isLess(j, j - h)) {          //tant que j est supérieur ou égal à h et que la ville j est plus proche de Grenoble que la ville j-h
+                swap(j, j - h);                           //on permute la ville j avec la ville j-h
+                j = j - h;                                   //on décrémente j de h
+            }                                               //on a parcouru le tableau et on a trouvé la ville la plus proche de Grenoble
+        }
+        h = Math.floor(h / 2);                            //on divise h par 2 pour réduire le pas de recherche
+    }
+    displayPermutation(nbPermutation);
+    displayListVille();
 }
 
-function mergesort() {
-    console.log("mergesort - implement me !");
-}
+// function mergesort() {                                      //tri fusion
+//     let temp = [];
+//     for (let i = 0; i < listVille.length; i++) {
+//         temp[i] = listVille[i];
+//     }
+//     mergeSortRec(temp, 0, listVille.length - 1);
+//     displayPermutation(nbPermutation);
+//     displayListVille();
+// }
+
+// function heapsort() {                                        //tri par tas
+//     buildMaxHeap(listVille);
+//     for (let i = listVille.length - 1; i >= 1; i--) {
+//         swap(0, i);
+//         maxHeapify(listVille, 0, i);
+//     }
+//     displayPermutation(nbPermutation);
+//     displayListVille();
+// }
 
 
-function heapsort() {
-    console.log("heapsort - implement me !");
-}
-
-function quicksort() {
-    console.log("quicksort - implement me !");
-}
+// function quicksort() {
+//
+// }
 
 /** MODEL */
 
@@ -185,7 +245,7 @@ function displayPermutation(nbPermutation) {
     document.getElementById('permutation').innerHTML = nbPermutation + ' permutations';
 }
 
-function displayListVille() {
+function displayListVille() {                                //affiche la liste des villes  dans la div listVille
     document.getElementById("navp").innerHTML = "";
     displayPermutation(nbPermutation);
     let mainList = document.getElementById("navp");
